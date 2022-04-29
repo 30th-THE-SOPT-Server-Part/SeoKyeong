@@ -1,8 +1,2 @@
-# ChoEunBi
-숙명여대 멋사 아기사자 조은비🦁
-<br><br>
-### 🦁 멋사 강의 수강 과제 🦁
-
-| 강의 내용 | 캡쳐 | 
-|:------:|:------|
-|`일단 만드는 HTML/CSS`|![htmlcss](https://user-images.githubusercontent.com/92033114/161764326-299ae2db-8ead-4022-a0a5-5821282b017f.JPG)| 
+# SeoKyeong
+![깃 허브 황서경](https://user-images.githubusercontent.com/20807197/160443540-cbc4ba33-b18b-4b34-a22a-a480d5f91304.png)
