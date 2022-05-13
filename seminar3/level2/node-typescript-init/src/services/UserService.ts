@@ -1,21 +1,22 @@
-import { BlogCreateDto } from "../interfaces/user/BlogCreateDto"
-import { BlogResponseDto } from "../interfaces/user/BlogResponseDto";
-import { BlogUpdateDto } from "../interfaces/user/BlogUpdateDto";
+import { UserCreateDto } from "../interfaces/user/UserCreateDto";
+import { UserResponseDto } from "../interfaces/user/UserResponseDto";
+import { UserUpdateDto } from "../interfaces/user/UserUpdateDto";
 import User from "../models/User"
 
-const createBlog = async (blogCreateDto: BlogCreateDto) => {
+const createUser = async (userCreateDto: UserCreateDto) => {
     try {
-        const blog = new User ({
-            writer: blogCreateDto.writer,
-            phone: blogCreateDto.phone,
-            email: blogCreateDto.email,
-            date: blogCreateDto.date
+        const user = new User({
+            name: userCreateDto.name,
+            phone: userCreateDto.phone,
+            email: userCreateDto.email,
+            age: userCreateDto.age,
+            school: userCreateDto.school
         });
 
-        await blog.save();
+        await user.save();
 
         const data = {
-            _id: blog._id
+            _id: user._id
         };
 
         return data;
@@ -23,47 +24,47 @@ const createBlog = async (blogCreateDto: BlogCreateDto) => {
         console.log(error);
         throw error;
     }
-}
+};
 
-const updateBlog = async (postId: string, blogUpdateDto: BlogUpdateDto) => {
+const updateUser = async (userId: string, userUpdateDto: UserUpdateDto) => {
     try {
-        const updatedBlog = {
-            writer: blogUpdateDto.writer,
-            phone: blogUpdateDto.phone,
-            email: blogUpdateDto.email,
-            date: blogUpdateDto.date
+        const updatedUser = {
+            name: userUpdateDto.name,
+            phone: userUpdateDto.phone,
+            email: userUpdateDto.email,
+            age: userUpdateDto.age,
+            school: userUpdateDto.school
         }
 
-        await User.findByIdAndUpdate(postId, updatedBlog);
+        await User.findByIdAndUpdate(userId, updatedUser);
     } catch (error) {
         console.log(error);
         throw error;
     }
-}
+};
 
-const findBlogById = async (postId: string) => {
+const findUserById = async (userId: string) => {
     try {
-        const blog: BlogResponseDto | null = await User.findById(postId);
-
-        return blog;
+        const user: UserResponseDto | null = await User.findById(userId);
+        return user;
     } catch (error) {
         console.log(error);
         throw error;
     }
-}
+};
 
-const deleteBlog = async (postId: string) => {
+const deleteUser = async (userId: string) => {
     try {
-        await User.findByIdAndDelete(postId);
+        await User.findByIdAndDelete(userId);
     } catch (error) {
         console.log(error);
         throw error;
     }
-}
+};
 
 export default {
-    createBlog,
-    updateBlog,
-    findBlogById,
-    deleteBlog
+    createUser,
+    updateUser,
+    findUserById,
+    deleteUser
 }

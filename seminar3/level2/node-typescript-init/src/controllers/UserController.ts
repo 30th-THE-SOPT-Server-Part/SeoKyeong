@@ -1,89 +1,91 @@
+import { Request, Response } from "express";
 import { PostBaseResponseDto } from "../interfaces/common/PostBaseResponseDto";
-import { BlogCreateDto } from "../interfaces/user/BlogCreateDto";
-import { BlogUpdateDto } from "../interfaces/user/BlogUpdateDto";
-import responseMessage from "../modules/responseMessage";
+import { UserCreateDto } from "../interfaces/user/UserCreateDto";
 import statusCode from "../modules/statusCode";
+import { UserService } from "../services";
 import util from "../modules/util";
-import UserService from "../services/UserService";
-import express, {Request, Response} from 'express';
-import { BlogResponseDto } from "../interfaces/user/BlogResponseDto";
+import message from "../modules/responseMessage";
+import { UserUpdateDto } from "../interfaces/user/UserUpdateDto";
+import { UserResponseDto } from "../interfaces/user/UserResponseDto";
 
 /**
- *  @route POST /blog
- *  @desc Create Blog
+ *  @route POST /user
+ *  @desc Create User
  *  @access Public
  */
-// Blog 생성
-const createBlog = async (req: Request, res: Response): Promise<void> => {
-    const blogCreateDto: BlogCreateDto = req.body;
+const createUser = async (req: Request, res: Response): Promise<void> => {
+    const userCreateDto: UserCreateDto = req.body;
 
     try {
-        const data: PostBaseResponseDto = await UserService.createBlog(blogCreateDto);
-        res.status(statusCode.CREATED).send(util.success(statusCode.CREATED, responseMessage.CREATED_USER_SUCCESS, data));
-    } catch (error) {
-        console.log(error);
-        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+        const data: PostBaseResponseDto = await UserService.createUser(userCreateDto);
+
+        res.status(statusCode.CREATED).send(util.success(statusCode.CREATED, message.CREATED_USER_SUCCESS, data));
+    } catch (err) {
+        console.log(err);
+
+        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, message.INTERNAL_SERVER_ERROR));
     }
-}
+};
 
 /**
- * @router PUT /blog/:postId
- * @desc Update Blog
+ * @route PUT /user/:userId
+ * @desc Update User
  * @access Public
  */
-// Blog 수정
-const updateBlog = async (req: Request, res: Response): Promise<void> => {
-    const blogUpdateDto: BlogUpdateDto = req.body;
-    const { postId } = req.params;
+ const updateUser = async (req: Request, res: Response): Promise<void> => {
+    const userUpdateDto: UserUpdateDto = req.body;
+    const { userId } = req.params;
 
-    try{
-        await UserService.updateBlog(postId, blogUpdateDto);
+    try {
+        await UserService.updateUser(userId, userUpdateDto);
+
+        res.status(statusCode.NO_CONTENT).send();
+
+    } catch (error) {
+        console.log(error);
+        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, message.INTERNAL_SERVER_ERROR));
+    }
+};
+
+/**
+ * @route GET /user/:userId
+ * @desc Get User
+ * @access Public
+ */
+ const findUserById = async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.params;
+
+    try {
+        const data: UserResponseDto | null = await UserService.findUserById(userId);
+
+        res.status(statusCode.OK).send(util.success(statusCode.OK, message.READ_USER_SUCCESS, data));
+    } catch (error) {
+        console.log(error);
+        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, message.INTERNAL_SERVER_ERROR));
+    }
+};
+
+/**
+ * @route DELETE /user/:userId
+ * @desc Delete User
+ * @access Public
+ */
+ const deleteUser = async (req: Request, res: Response): Promise<void> => {
+    const { userId } = req.params;
+
+    try {
+        await UserService.deleteUser(userId);
+
         res.status(statusCode.NO_CONTENT).send();
     } catch (error) {
         console.log(error);
-        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, message.INTERNAL_SERVER_ERROR));
     }
-}
-
-/**
- * @route GET /blog/:postId
- * @desc GET Blog
- * @access Public
- */
-// Blog 조회
-const findBlogById = async (req: Request, res: Response): Promise<void> => {
-    const { postId } = req.params;
-
-    try {
-        const data: BlogResponseDto | null = await UserService.findBlogById(postId);
-        res.status(statusCode.OK).send(util.success(statusCode.OK, responseMessage.READ_USER_SUCCESS, data));
-    } catch (error) {
-        console.log(error);
-        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-}
-
-/**
- * @route DELETE /blog/:postId
- * @desc Delete Blog
- * @access Public
- */
-// Blog 삭제
-const deleteBlog = async (req: Request, res: Response): Promise<void> => {
-    const { postId } = req.params;
-
-    try {
-        await UserService.deleteBlog(postId);
-        res.status(statusCode.NO_CONTENT).send();
-    } catch (error) {
-        console.log(error);
-        res.status(statusCode.INTERNAL_SERVER_ERROR).send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
-    }
-}
+};
 
 export default {
-    createBlog,
-    updateBlog,
-    findBlogById,
-    deleteBlog
-}
+    createUser,
+    updateUser,
+    findUserById,
+    deleteUser
+};

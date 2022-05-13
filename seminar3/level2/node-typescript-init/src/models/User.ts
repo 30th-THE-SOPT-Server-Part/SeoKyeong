@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 import { UserInfo } from "../interfaces/user/UserInfo";
 
 const UserSchema = new mongoose.Schema({
-    writer: {
-        name: { type: String },
-        nickname: { type: String }
-    }, 
+    name: {
+        type: String,
+        required: true
+    },
     phone: {
         type: String,
         required: true
@@ -15,9 +15,12 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    date: {
-        type: Number,
-        required: true
+    age: {
+        type: Number
+    },
+    school: {
+        name: { type: String },
+        major: { type: String }
     }
 });
 

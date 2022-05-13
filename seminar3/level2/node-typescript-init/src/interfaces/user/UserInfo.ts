@@ -1,8 +1,9 @@
-import { WriterInfo } from "../writer/WriterInfo";
+import { SchoolInfo } from "../school/SchoolInfo";
 
 export interface UserInfo {
-    writer: WriterInfo;
+    name: string;
     phone: string;
     email: string;
-    date: number;
+    age: number;
+    school: SchoolInfo;
 }
