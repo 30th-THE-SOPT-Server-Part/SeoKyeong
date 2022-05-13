@@ -1,4 +1,4 @@
-import { SchoolInfo } from "../school/schoolInfo";
+import { SchoolInfo } from "../school/SchoolInfo";
 
 export interface UserUpdateDto {
     name?: string,
