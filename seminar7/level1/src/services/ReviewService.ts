@@ -84,7 +84,37 @@ const getReviews = async (
   }
 };
 
+const getAllReviews = async (
+  movieId: string,
+  page: number
+): Promise<ReviewsResponseDto> => {
+  let reviews: ReviewInfo[] = [];
+  const perPage: number = 2;
+
+  try {
+    reviews = await Review.find()
+      .where("movie")
+      .equals(movieId)
+      .sort({ createdAt: -1 })
+      .skip(perPage * (page - 1))
+      .limit(perPage);
+
+    const total = await Review.countDocuments({});
+    const lastPage: number = Math.ceil(total / perPage);
+
+    const data = {
+      reviews,
+      lastPage,
+    };
+    return data;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
 export default {
   createReview,
   getReviews,
+  getAllReviews,
 };

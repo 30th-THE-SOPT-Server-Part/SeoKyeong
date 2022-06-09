@@ -1,23 +1,25 @@
 //import { validationResult } from "express-validator"
 import express, { Request, Response } from "express";
 import { MovieCommentCreateDto } from "../interfaces/movie/MovieCommentCreateDto";
+import { MovieCommentUpdateDto } from "../interfaces/movie/MovieCommentUpdateDto";
 import { MovieCreateDto } from "../interfaces/movie/MovieCreateDto";
 import { MovieOptionType } from "../interfaces/movie/MovieOptionType";
+import { MovieUpdateDto } from "../interfaces/movie/MovieUpdateDto";
 import message from "../modules/responseMessage";
 import statusCode from "../modules/statusCode";
 import util from "../modules/util";
 import MovieService from "../services/MovieService";
-
 const { validationResult } = require("express-validator");
 
 /**
- * @route POST /movie
+ * @router POST /movies
  * @desc Create Movie
  * @access Public
  */
 const createMovie = async (req: Request, res: Response) => {
-  const error = validationResult(req);
-  if (!error.isEmpty()) {
+  const err = validationResult(req);
+
+  if (!err.isEmpty()) {
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, message.BAD_REQUEST));
@@ -27,13 +29,14 @@ const createMovie = async (req: Request, res: Response) => {
 
   try {
     const data = await MovieService.createMovie(movieCreateDto);
+
     res
       .status(statusCode.CREATED)
       .send(
-        util.success(statusCode.CREATED, message.CREATED_MOVIE_SUCCESS, data)
+        util.success(statusCode.CREATED, message.CREATE_MOVIE_SUCCESS, data)
       );
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
     res
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .send(
@@ -46,13 +49,107 @@ const createMovie = async (req: Request, res: Response) => {
 };
 
 /**
- *  @route POST /movie/:movieId/comment
- *  @desc Create Movie Comment
- *  @access Public
+ * @route GET /movies/:movieId
+ * @desc GET Movie
+ * @access Public
+ */
+const getMovie = async (req: Request, res: Response) => {
+  const { movieId } = req.params;
+
+  try {
+    const data = await MovieService.getMovie(movieId);
+    if (!data)
+      res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, message.NOT_FOUND));
+
+    res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, message.READ_MOVIE_SUCCESS, data));
+  } catch (err) {
+    console.log(err);
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(
+        util.fail(
+          statusCode.INTERNAL_SERVER_ERROR,
+          message.INTERNAL_SERVER_ERROR
+        )
+      );
+  }
+};
+
+/**
+ * @route PUT /movies/:movieId
+ * @desc Update Movie
+ * @access Public
+ */
+const updateMovie = async (req: Request, res: Response) => {
+  const err = validationResult(req);
+
+  if (!err.isEmpty()) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, message.BAD_REQUEST));
+  }
+
+  const movieUpdateDto: MovieUpdateDto = req.body;
+  const { movieId } = req.params;
+
+  try {
+    await MovieService.updateMovie(movieId, movieUpdateDto);
+
+    res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, message.UPDATE_MOVIE_SUCCESS));
+  } catch (err) {
+    console.log(err);
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(
+        util.fail(
+          statusCode.INTERNAL_SERVER_ERROR,
+          message.INTERNAL_SERVER_ERROR
+        )
+      );
+  }
+};
+
+/**
+ * @route DELETE /movies/:movieId
+ * @desc DELETE Movie
+ * @access Public
+ */
+const deleteMovie = async (req: Request, res: Response) => {
+  const { movieId } = req.params;
+
+  try {
+    await MovieService.deleteMovie(movieId);
+
+    res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, message.DELETE_MOVIE_SUCCESS));
+  } catch (err) {
+    console.log(err);
+    res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(
+        util.fail(
+          statusCode.INTERNAL_SERVER_ERROR,
+          message.INTERNAL_SERVER_ERROR
+        )
+      );
+  }
+};
+
+/**
+ * @route POST /movies/:movieId/comment
+ * @desc Create Movie Comment
+ * @access Public
  */
 const createMovieComment = async (req: Request, res: Response) => {
-  const error = validationResult(req);
-  if (!error.isEmpty()) {
+  const err = validationResult(req);
+  if (!err.isEmpty()) {
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, message.BAD_REQUEST));
@@ -80,8 +177,8 @@ const createMovieComment = async (req: Request, res: Response) => {
           data
         )
       );
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
     res
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .send(
@@ -94,29 +191,42 @@ const createMovieComment = async (req: Request, res: Response) => {
 };
 
 /**
- *  @route POST /movie/:movieId
- *  @desc Get Movie Comment
- *  @access Public
+ * @route PUT /movies/movieId/comments/:commentId
+ * @desc UPdate Movie Comment
+ * @access Public
  */
-const getMovie = async (req: Request, res: Response) => {
-  const { movieId } = req.params;
+const updateMovieComment = async (req: Request, res: Response) => {
+  const err = validationResult(req);
+
+  if (!err.isEmpty()) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, message.BAD_REQUEST));
+  }
+
+  const commentUpdateDto: MovieCommentUpdateDto = req.body;
+  const { movieId, commentId } = req.params;
 
   try {
-    const data = await MovieService.getMovie(movieId);
+    const data = await MovieService.updateMovieComment(
+      movieId,
+      commentId,
+      req.body.user.id,
+      commentUpdateDto
+    );
+
     if (!data)
-      res
+      return res
         .status(statusCode.NOT_FOUND)
         .send(util.fail(statusCode.NOT_FOUND, message.NOT_FOUND));
 
-    res
-      .status(statusCode.OK)
-      .send(util.success(statusCode.OK, message.READ_MOVIE_SUCEESS, data));
-  } catch (error) {
-    console.log(error);
+    res.status(statusCode.NO_CONTENT).send();
+  } catch (err) {
+    console.log(err);
     res
       .status(statusCode.INTERNAL_SERVER_ERROR)
       .send(
-        util.fail(
+        util.success(
           statusCode.INTERNAL_SERVER_ERROR,
           message.INTERNAL_SERVER_ERROR
         )
@@ -131,26 +241,32 @@ const getMovie = async (req: Request, res: Response) => {
  */
 const getMoviesBySearch = async (req: Request, res: Response) => {
   const { search, option } = req.query;
-
-  const isOptionType = (option: string): option is MovieOptionType => {
-    return ["title", "director", "title_director"].indexOf(option) !== -1;
-  };
-
-  if (!isOptionType(option as string)) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, message.NULL_VALUE));
-  }
-
   const page: number = Number(req.query.page || 1);
+  let data;
 
   try {
-    const data = await MovieService.getMoviesBySearch(
-      search as string,
-      option as MovieOptionType,
-      page
-    );
+    if (search && option) {
+      const isOptionType = (option: string): option is MovieOptionType => {
+        return ["title", "director", "title_director"].indexOf(option) !== -1;
+      };
 
+      if (!isOptionType(option as string)) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, message.NULL_VALUE));
+      }
+      data = await MovieService.getMoviesBySearch(
+        search as string,
+        option as MovieOptionType,
+        page
+      );
+    } else if (!search && !option) {
+      data = await MovieService.getAllMovies(page);
+    } else {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, message.NULL_VALUE));
+    }
     res
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, message.SEARCH_MOVIE_SUCCESS, data));
@@ -169,7 +285,10 @@ const getMoviesBySearch = async (req: Request, res: Response) => {
 
 export default {
   createMovie,
-  createMovieComment,
   getMovie,
+  updateMovie,
+  deleteMovie,
+  createMovieComment,
+  updateMovieComment,
   getMoviesBySearch,
 };

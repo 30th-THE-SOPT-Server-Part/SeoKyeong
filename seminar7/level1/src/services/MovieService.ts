@@ -4,9 +4,10 @@ import { MovieCreateDto } from "../interfaces/movie/MovieCreateDto";
 import { MovieCommentInfo, MovieInfo } from "../interfaces/movie/MovieInfo";
 import { MovieResponseDto } from "../interfaces/movie/MovieResponseDto";
 import Movie from "../models/Movie";
-import mongoose from "mongoose";
 import { MovieOptionType } from "../interfaces/movie/MovieOptionType";
 import { MoviesResponseDto } from "../interfaces/movie/MoviesResponseDto";
+import { MovieUpdateDto } from "../interfaces/movie/MovieUpdateDto";
+import { MovieCommentUpdateDto } from "../interfaces/movie/MovieCommentUpdateDto";
 
 const createMovie = async (
   movieCreateDto: MovieCreateDto
@@ -24,6 +25,32 @@ const createMovie = async (
   } catch (error) {
     console.log(error);
     throw error;
+  }
+};
+
+const updateMovie = async (movieId: string, movieUpdateDto: MovieUpdateDto) => {
+  try {
+    const updatedMovie = {
+      title: movieUpdateDto.title,
+      director: movieUpdateDto.director,
+      startDate: movieUpdateDto.startDate,
+      thumbnail: movieUpdateDto.thumbnail,
+      story: movieUpdateDto.story,
+    };
+
+    await Movie.findByIdAndUpdate(movieId, updatedMovie);
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+const deleteMovie = async (movieId: string) => {
+  try {
+    await Movie.findByIdAndDelete(movieId);
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };
 
@@ -66,6 +93,38 @@ const getMovie = async (movieId: string): Promise<MovieResponseDto | null> => {
   } catch (error) {
     console.log(error);
     throw error;
+  }
+};
+
+const updateMovieComment = async (
+  movieId: string,
+  commentId: string,
+  userId: string,
+  commentUpdateDto: MovieCommentUpdateDto
+): Promise<MovieInfo | null> => {
+  try {
+    const movie = await Movie.findById(movieId);
+
+    if (!movie) return null;
+
+    const data = await Movie.findOneAndUpdate(
+      {
+        _id: movieId,
+        comments: { $elemMatch: { _id: commentId, writer: userId } },
+      },
+      {
+        $set: {
+          "comments.$.writer": userId,
+          "comments.$.comment": commentUpdateDto.comment,
+        },
+      },
+      { new: true }
+    );
+
+    return data;
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };
 
@@ -117,9 +176,35 @@ const getMoviesBySearch = async (
   }
 };
 
+const getAllMovies = async (page: number): Promise<MoviesResponseDto> => {
+  const perPage: number = 3;
+
+  try {
+    const movies = await Movie.find()
+      .sort({ createdAt: -1 })
+      .skip(perPage * (page - 1))
+      .limit(perPage);
+
+    const total: number = await Movie.countDocuments({});
+    const lastPage: number = Math.ceil(total / perPage);
+
+    return {
+      lastPage,
+      movies,
+    };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
 export default {
   createMovie,
+  updateMovie,
+  deleteMovie,
   createMovieComment,
+  updateMovieComment,
   getMovie,
   getMoviesBySearch,
+  getAllMovies,
 };
