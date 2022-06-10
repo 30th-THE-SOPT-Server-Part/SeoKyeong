@@ -136,7 +136,7 @@ const getMoviesBySearch = async (
   const regex = (pattern: string) => new RegExp(`.*${pattern}.*`);
 
   let movies: MovieInfo[] = [];
-  const perPage: number = 2;
+  const perPage: number = 3;
 
   try {
     const titleRegex = regex(search);
@@ -170,9 +170,31 @@ const getMoviesBySearch = async (
       lastPage,
       movies,
     };
-  } catch (error) {
-    console.log(error);
-    throw error;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+const getAllMovies = async (page: number): Promise<MoviesResponseDto> => {
+  const perPage: number = 3;
+
+  try {
+    const movies = await Movie.find()
+      .sort({ createdAt: -1 })
+      .skip(perPage * (page - 1))
+      .limit(perPage);
+
+    const total: number = await Movie.countDocuments({});
+    const lastPage: number = Math.ceil(total / perPage);
+
+    return {
+      lastPage,
+      movies,
+    };
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };
 
@@ -184,4 +206,5 @@ export default {
   updateMovieComment,
   getMovie,
   getMoviesBySearch,
+  getAllMovies,
 };
