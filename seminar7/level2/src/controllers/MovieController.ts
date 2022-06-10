@@ -241,26 +241,32 @@ const updateMovieComment = async (req: Request, res: Response) => {
  */
 const getMoviesBySearch = async (req: Request, res: Response) => {
   const { search, option } = req.query;
-
-  const isOptionType = (option: string): option is MovieOptionType => {
-    return ["title", "director", "title_director"].indexOf(option) !== -1;
-  };
-
-  if (!isOptionType(option as string)) {
-    return res
-      .status(statusCode.BAD_REQUEST)
-      .send(util.fail(statusCode.BAD_REQUEST, message.NULL_VALUE));
-  }
-
   const page: number = Number(req.query.page || 1);
+  let data;
 
   try {
-    const data = await MovieService.getMoviesBySearch(
-      search as string,
-      option as MovieOptionType,
-      page
-    );
+    if (search && option) {
+      const isOptionType = (option: string): option is MovieOptionType => {
+        return ["title", "director", "title_director"].indexOf(option) !== -1;
+      };
 
+      if (!isOptionType(option as string)) {
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, message.NULL_VALUE));
+      }
+      data = await MovieService.getMoviesBySearch(
+        search as string,
+        option as MovieOptionType,
+        page
+      );
+    } else if (!search && !option) {
+      data = await MovieService.getAllMovies(page);
+    } else {
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, message.NULL_VALUE));
+    }
     res
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, message.SEARCH_MOVIE_SUCCESS, data));
